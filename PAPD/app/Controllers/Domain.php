@@ -27,11 +27,31 @@ class Domain extends BaseController
         $this->builderDomain->groupBy('owner');
         $queryPemilikDomain = $this->builderDomain->get();
 
+        $this->builderDomain->select('tipe, COUNT("tipe") AS jumlah_tipe');
+        $this->builderDomain->groupBy('tipe');
+        $queryTipe = $this->builderDomain->get();
+
+        $this->builderDomain->select('unitkerja_uptd, COUNT("unitkerja_uptd") AS jumlah_unitkerja');
+        $this->builderDomain->groupBy('unitkerja_uptd');
+        $queryUnitKerja = $this->builderDomain->get();
+
+        $this->builderDomain->select('lokasi_hosting, COUNT("lokasi_hosting") AS jumlah_lh');
+        $this->builderDomain->groupBy('lokasi_hosting');
+        $queryLokasiHosting = $this->builderDomain->get();
+
+        $this->builderDomain->select('status, COUNT("lokasi_hosting") AS jumlah_status');
+        $this->builderDomain->groupBy('status');
+        $queryStatus = $this->builderDomain->get();
+
         $data = [
             'title' => 'Daftar Domain',
             'needapproval' => $countneedapproval,
             'pemilikDomain' => $queryPemilikDomain->getResult(),
-            'domain' => $this->domainModel->getDomain()
+            'tipes' => $queryTipe->getResult(),
+            'unitKerja' => $queryUnitKerja->getResult(),
+            'lokasiHosting' => $queryLokasiHosting->getResult(),
+            'status' => $queryStatus->getResult(),
+            'subdomains' => $this->domainModel->getDomain()
         ];
 
         return view('domain/index', $data);
@@ -114,11 +134,11 @@ class Domain extends BaseController
             'slug'                      => $slug,
             'owner'                     => $this->request->getVar('owner'),
             'tipe'                      => $this->request->getVar('tipe'),
-            // 'unitkerja_uptd'            => $this->request->getVar('unitkerja_uptd'),
+            'unitkerja_uptd'            => $this->request->getVar('unitkerja_uptd'),
             // 'lokasi_hosting'            => $this->request->getVar('lokasi_hosting'),
             // 'ip_address'                => $this->request->getVar('ip_address'),
             // 'penanggung_jawab'          => $this->request->getVar('penanggung_jawab'),
-            // 'status'                    => $this->request->getVar('status'),
+            'status'                    => $this->request->getVar('status'),
             // 'deskripsi_fituraplikasi'   => $this->request->getVar('deskripsi_fituraplikasi'),
             // 'bahasa_pemograman'         => $this->request->getVar('bahasa_pemograman'),
             // 'framework_cms'             => $this->request->getVar('framework_cms'),
@@ -151,73 +171,88 @@ class Domain extends BaseController
     //     return redirect()->to('/komik');
     // }
 
-    // public function edit($slug)
-    // {
-    //     $data = [
-    //         'title' => 'Form Ubah Data Komik',
-    //         'validation' => \Config\Services::validation(),
-    //         'komik' => $this->komikModel->getKomik($slug)
-    //     ];
+    public function edit($slug)
+    {
+        $data = [
+            'title' => 'Form Ubah Data SubDomain',
+            'validation' => \Config\Services::validation(),
+            'domain' => $this->domainModel->getDomain($slug)
+        ];
 
-    //     return view('komik/edit', $data);
-    // }
+        return view('domain/edit', $data);
+    }
 
-    // public function update($id)
-    // {
-    //     // cek judul
-    //     $komikLama = $this->komikModel->getKomik($this->request->getVar('slug'));
-    //     if ($komikLama['judul'] == $this->request->getVar('judul')) {
-    //         $rule_judul = 'required';
-    //     } else {
-    //         $rule_judul = 'required|is_unique[komik.judul]';
-    //     }
+    public function update($id)
+    {
+        // cek judul
+        $domainLama = $this->domainModel->getDomain($this->request->getVar('slug'));
+        if ($domainLama['sub_domain'] == $this->request->getVar('sub_domain')) {
+            $rule_domain = 'required';
+        } else {
+            $rule_domain = 'required|is_unique[list_subdomain.sub_domain]';
+        }
 
-    //     if (!$this->validate([
-    //         'judul' => [
-    //             'rules' => $rule_judul,
-    //             'errors' => [
-    //                 'required' => '{field} komik harus diisi.',
-    //                 'is_unique' => '{field} komik sudah terdaftar.'
-    //             ]
-    //         ],
-    //         'sampul' => [
-    //             'rules' => 'max_size[sampul,1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
-    //             'errors' => [
-    //                 'max_size' => 'Ukuran gambar terlalu besar',
-    //                 'is_image' => 'Yang anda pilih bukan gambar',
-    //                 'mime_in' => 'Yang anda pilih bukan gambar'
-    //             ]
-    //         ]
-    //     ])) {
-    //         return redirect()->to('/komik/edit/' . $this->request->getVar('slug'))->withInput();
-    //     }
+        if (!$this->validate([
+            'sub_domain' => [
+                'rules' => $rule_domain,
+                'errors' => [
+                    'required' => 'Sub Domain harus diisi.',
+                    'is_unique' => 'Sub Domain sudah terdaftar.'
+                ]
+            ],
+            'foto' => [
+                'rules' => 'max_size[foto,1024]|is_image[foto]|mime_in[foto,image/jpg,image/jpeg,image/png]',
+                'errors' => [
+                    'max_size' => 'Ukuran gambar terlalu besar',
+                    'is_image' => 'Yang anda pilih bukan gambar',
+                    'mime_in' => 'Yang anda pilih bukan gambar'
+                ]
+            ]
+        ])) {
+            return redirect()->to('/domain/edit/' . $this->request->getVar('slug'))->withInput();
+        }
 
-    //     $fileSampul = $this->request->getFile('sampul');
+        $fileSampul = $this->request->getFile('foto');
 
-    //     // cek gambar, apakah tetap gambar lama
-    //     if ($fileSampul->getError() == 4) {
-    //         $namaSampul = $this->request->getVar('sampulLama');
-    //     } else {
-    //         // generate nama file random
-    //         $namaSampul = $fileSampul->getRandomName();
-    //         // pindakhan gambar
-    //         $fileSampul->move('img', $namaSampul);
-    //         // hapus file yang lama
-    //         unlink('img/' . $this->request->getVar('sampulLama'));
-    //     }
+        // cek gambar, apakah tetap gambar lama
+        if ($fileSampul->getError() == 4) {
+            $namaSampul = $this->request->getVar('fotoLama');
+        } else {
+            // generate nama file random
+            $namaSampul = $fileSampul->getRandomName();
+            // pindakhan gambar
+            $fileSampul->move('img', $namaSampul);
+            // hapus file yang lama
+            unlink('img/' . $this->request->getVar('fotoLama'));
+        }
 
-    //     $slug = url_title($this->request->getVar('judul'), '-', true);
-    //     $this->komikModel->save([
-    //         'id' => $id,
-    //         'judul' => $this->request->getVar('judul'),
-    //         'slug' => $slug,
-    //         'penulis' => $this->request->getVar('penulis'),
-    //         'penerbit' => $this->request->getVar('penerbit'),
-    //         'sampul' => $namaSampul
-    //     ]);
+        $slug = url_title($this->request->getVar('sub_domain'), '-', true);
+        $no_registrasi = '';
+        $this->domainModel->save([
+            'id' => $id,
+            'no_registrasi' => $no_registrasi,
+            'sub_domain' => $this->request->getVar('sub_domain'),
+            'slug'                      => $slug,
+            'owner'                     => $this->request->getVar('owner'),
+            'tipe'                      => $this->request->getVar('tipe'),
+            'unitkerja_uptd'            => $this->request->getVar('unitkerja_uptd'),
+            // 'lokasi_hosting'            => $this->request->getVar('lokasi_hosting'),
+            // 'ip_address'                => $this->request->getVar('ip_address'),
+            // 'penanggung_jawab'          => $this->request->getVar('penanggung_jawab'),
+            'status'                    => $this->request->getVar('status'),
+            // 'deskripsi_fituraplikasi'   => $this->request->getVar('deskripsi_fituraplikasi'),
+            // 'bahasa_pemograman'         => $this->request->getVar('bahasa_pemograman'),
+            // 'framework_cms'             => $this->request->getVar('framework_cms'),
+            // 'database'                  => $this->request->getVar('database'),
+            // 'type_operating_system'     => $this->request->getVar('type_operating_system'),
+            // 'operating_system_server'   => $this->request->getVar('operating_system_server'),
+            // 'tahun_dibuat'              => $this->request->getVar('tahun_dibuat'),
+            'pic'                          => $namaSampul
+            // 'keterangan'                => $this->request->getVar('sub_domain')
+        ]);
 
-    //     session()->setFlashdata('pesan', 'Data berhasil diubah.');
+        session()->setFlashdata('pesan', 'Data Domain berhasil diubah.');
 
-    //     return redirect()->to('/komik');
-    // }
+        return redirect()->to('/domain/' . $slug);
+    }
 }

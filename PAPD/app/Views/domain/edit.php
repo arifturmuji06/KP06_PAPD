@@ -6,8 +6,10 @@
     <!-- Page Heading -->
     <h1 class="h3 mb-4 text-gray-800">Tambah Data Subdomain</h1>
 
-    <form action="/domain/save" method="post" enctype="multipart/form-data">
+    <form action="/domain/update/<?= $domain['id']; ?>" method="post" enctype="multipart/form-data">
         <?= csrf_field(); ?>
+        <input type="hidden" name="slug" value="<?= $domain['slug']; ?>">
+        <input type="hidden" name="fotoLama" value="<?= $domain['pic']; ?>">
         <!-- <div class="form-group row">
             <label for="inputNoRegistrasi" class="col-sm-10 col-form-label">No Registrasi</label>
             <div class="col-sm-10">
@@ -17,7 +19,7 @@
         <div class="form-group row">
             <label for="inputNamaSubdomain" class="col-sm-10 col-form-label">Nama Subdomain</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control <?= ($validation->hasError('sub_domain')) ? 'is-invalid' : ''; ?>" id="sub_domain" name="sub_domain" autofocus value="<?= old('sub_domain'); ?>">
+                <input type="text" class="form-control <?= ($validation->hasError('sub_domain')) ? 'is-invalid' : ''; ?>" id="sub_domain" name="sub_domain" autofocus value="<?= (old('sub_domain')) ? old('sub_domain') : $domain['sub_domain'] ?>">
                 <div class="invalid-feedback">
                     <?= $validation->getError('sub_domain'); ?>
                 </div>
@@ -27,7 +29,7 @@
             <label for="inputOwner" class="col-sm-10 col-form-label">Owner</label>
             <div class="col-sm-10">
                 <select class="form-control" id="owner" name="owner" aria-label="multiple select example">
-                    <option selected>-Owner-</option>
+                    <option selected><?= ($domain['owner'] != null) ? $domain['owner'] : '-Owner-'; ?></option>
                     <option value="Badan Kepegawaian Daerah">Badan Kepegawaian Daerah</option>
                     <option value="Badan Kesatuan Bangsa dan Politik">Badan Kesatuan Bangsa dan Politik</option>
                     <option value="Badan Penanggulangan Bencana Daerah">Badan Penanggulangan Bencana Daerah</option>
@@ -67,13 +69,13 @@
                 <label for="inputTipe" class="col-sm col-form-label">Tipe</label>
                 <div class="col-sm">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="tipe" id="tipe1" value="Aplikasi">
+                        <input class="form-check-input" type="radio" name="tipe" id="tipe1" value="Aplikasi" <?= ($domain['tipe'] == 'Aplikasi') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="tipe1">
                             Aplikasi
                         </label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="tipe" id="tipe2" value="Website">
+                        <input class="form-check-input" type="radio" name="tipe" id="tipe2" value="Website" <?= ($domain['tipe'] == 'Website') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="tipe2">
                             Website
                         </label>
@@ -84,13 +86,13 @@
                 <label for="inputUnitKerja" class="col-sm col-form-label">Unit Kerja</label>
                 <div class="col-sm">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="unitkerja_uptd" id="unitkerja1" value="option1">
+                        <input class="form-check-input" type="radio" name="unitkerja_uptd" id="unitkerja1" value="Unit Kerja" <?= ($domain['unitkerja_uptd'] == 'Unit Kerja') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="unitkerja1">
                             Unit Kerja
                         </label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="unitkerja_uptd" id="unitkerja2" value="option2">
+                        <input class="form-check-input" type="radio" name="unitkerja_uptd" id="unitkerja2" value="UPTD" <?= ($domain['unitkerja_uptd'] == 'UPTD') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="unitkerja2">
                             UPTD
                         </label>
@@ -101,25 +103,25 @@
                 <label for="inputStatus" class="col-sm col-form-label">Status</label>
                 <div class="col-sm">
                     <div class="form-check form-check">
-                        <input class="form-check-input" type="radio" name="status" id="status1" value="Aktif">
+                        <input class="form-check-input" type="radio" name="status" id="status1" value="Aktif" <?= ($domain['status'] == 'Aktif') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="status1">
                             Aktif
                         </label>
                     </div>
                     <div class="form-check form-check">
-                        <input class="form-check-input" type="radio" name="status" id="status2" value="Deaktivasi">
+                        <input class="form-check-input" type="radio" name="status" id="status2" value="Deaktivasi" <?= ($domain['status'] == 'Deaktivasi') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="status2">
                             Deaktivasi
                         </label>
                     </div>
                     <div class="form-check form-check">
-                        <input class="form-check-input" type="radio" name="status" id="status3" value="Penonaktifan Sementara">
+                        <input class="form-check-input" type="radio" name="status" id="status3" value="Penonaktifan Sementara" <?= ($domain['status'] == 'Penonaktifan Sementara') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="status3">
                             Penonaktifan Sementara
                         </label>
                     </div>
                     <div class="form-check form-check">
-                        <input class="form-check-input" type="radio" name="status" id="status4" value="Perlu Konfirmasi">
+                        <input class="form-check-input" type="radio" name="status" id="status4" value="Perlu Konfirmasi" <?= ($domain['status'] == 'Perlu Konfirmasi') ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="status4">
                             Perlu Konfirmasi
                         </label>
@@ -226,7 +228,8 @@
         </div>
         <div class="form-group row">
             <div class="col-sm-10">
-                <button type="submit" class="btn btn-primary">Tambah Data</button>
+                <button type="submit" class="btn btn-primary">Ubah Data</button>
+                <a href="/domain/<?= $domain['slug']; ?>" class="btn btn-primary">Kembali</a>
             </div>
         </div>
     </form>

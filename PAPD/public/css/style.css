@@ -5,3 +5,23 @@ span.badge.badge-danger.badge-counter {
 .card.border-left-primary.shadow.h-100.py-2.tombol-aktif {
   background: #f0f0f0;
 }
+
+.card-img,
+.card-img-bottom {
+  border-bottom-right-radius: calc(0.35rem - 1px);
+  border-bottom-left-radius: calc(0.35rem - 1px);
+  width: 100%;
+  margin: auto;
+  position: absolute;
+}
+
+.card-img-subdomain {
+  border-bottom-right-radius: calc(0.35rem - 1px);
+  border-bottom-left-radius: calc(0.35rem - 1px);
+  width: 50%;
+  margin: auto;
+}
+
+.col-xl-4.col-md-6.mb-4.tipe-aplikasi {
+  height: 11rem;
+}
